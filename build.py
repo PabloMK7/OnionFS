@@ -5,7 +5,7 @@ import ftplib
 import glob
 
 # the path plugin was copied to
-COPYTOPATH = 'layeredfs.plg'
+COPYTOPATH = 'OnionFS.plg'
 
 CC = "arm-none-eabi-gcc"
 CP = "arm-none-eabi-g++"
