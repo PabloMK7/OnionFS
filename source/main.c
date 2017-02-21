@@ -4,7 +4,7 @@
 #include "autogen.h"
 
 /* uncomment this to log filename into debugger output */
-// #define LOG_FILES
+// #define LOG_FILES 
 
 #define O_RDONLY 1
 #define O_WRONLY 2
@@ -100,6 +100,17 @@ void ustrCat(u16* src, u16* str) {
 u16 testFile []= {'r','a','m',':','/','1',0,0};
 u16 ustrRom [] = {'r','o','m',':','/'};
 u16 ustrRootPath[200];
+char tmpstr[200];
+
+int findcharacter(u16* in, u16 character) {
+	u16 i = 0;
+	while (*(in + i)) {
+		if (*(in + i) == character)
+			return i;
+		i++;
+	}
+	return 0; //error
+}
 
 u32 userFsTryOpenFileCallback(u32 a1, u16 * fileName, u32 mode) {
 	u16 buf[300];
@@ -110,11 +121,11 @@ u32 userFsTryOpenFileCallback(u32 a1, u16 * fileName, u32 mode) {
 	nsDbgPrint("path: %s\n", buf);
 #endif
 
-	if (memcmp(ustrRom, fileName, sizeof(ustrRom)) == 0) {
+//	if (memcmp(ustrRom, fileName, sizeof(ustrRom)) == 0) {
 		// accessing rom:/ file
 		buf[0] = 0;
 		ustrCat(buf, ustrRootPath);
-		ustrCat(buf, &fileName[5]);
+		ustrCat(buf, &fileName[findcharacter(fileName, (u16)'/') + 1]);
 		ret = ((userFsTryOpenFileTypeDef)userFsTryOpenFileHook.callCode)(a1, buf, 1);
 #ifdef LOG_FILES
 		nsDbgPrint("ret: %08x\n", ret);
@@ -122,7 +133,7 @@ u32 userFsTryOpenFileCallback(u32 a1, u16 * fileName, u32 mode) {
 		if (ret == 0) {
 			return ret;
 		}
-	}
+//	}
 	return ((userFsTryOpenFileTypeDef)userFsTryOpenFileHook.callCode)(a1, fileName, mode);
 }
 
