@@ -3,12 +3,17 @@ OnionFS is a fork of layeredfs plugin made by cell9, that redirects romfs access
 The plugin will redirect the game romfs to **"SD:/OnionFS/\<titleID\>"** by default.
 
 ##Custom path
-Add your custom path by changing the OnionFS.plg at address **0x3058**.
-For example: "SD:/myfolder/hello" must be written at **0x3058** as **"ram:/myfolder/hello/"**. Clear any "yourpath" string you see.
-(*A python script is being made to make this process easier.*)
+To change the redirection path, use the included python script:
+
+```
+OnionFS_pathchange.py \<plg file path\> \<redirection path\>
+```
+For example: SD:/folder/subfolder/
+```
+OnionFS_pathchange.py OnionFS.plg folder/subfolder
+```
 
 ##Credits
-
 cell9: Cretor of layeredfs and NTRCFW.
 
 Nanquitas: Helping me A LOT with my noob questions. xP
