@@ -100,7 +100,6 @@ void ustrCat(u16* src, u16* str) {
 u16 testFile []= {'r','a','m',':','/','1',0,0};
 u16 ustrRom [] = {'r','o','m',':','/'};
 u16 ustrRootPath[200];
-char tmpstr[200];
 
 int findcharacter(u16* in, u16 character) {
 	u16 i = 0;
