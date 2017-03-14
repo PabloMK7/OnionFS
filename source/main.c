@@ -93,7 +93,7 @@ u8 archivecount = 0;
 u8 checkarchive(u8* path, u8 size) {
 	u8 i;
 	for (i = 0; i < archivecount; i++) {
-		if (memcmp(archivelist + (10*i), path, size))
+		if (memcmp(archivelist + (10*i), path, size) == 0)
 			return 1;
 	}
 	return 0;
