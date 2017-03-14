@@ -27,7 +27,7 @@ u32 fsRegArchive;
 u32 userFsTryOpenFile;
 u32 cfgReadBlock = 0x0;
 
-Handle fsUserHandle;
+
 FS_archive sdmcArchive = {0x9, (FS_path){PATH_EMPTY, 1, (u8*)""}};
 
 typedef u32 (*fsRegArchiveTypeDef)(u8*, u32, u32, u32) ;
@@ -37,6 +37,76 @@ typedef u32 (*fsMountArchiveTypeDef)(u32*, u32);
 
 RT_HOOK	regArchiveHook;
 RT_HOOK userFsTryOpenFileHook;
+u32     fsUserHandle = 0;
+
+int     InitFS(void)
+{
+    static int init = 0;
+
+    if (init != 0)
+    {
+        svc_closeHandle(fsUserHandle);
+        init = 0;
+    }
+
+    int res = srv_getServiceHandle(NULL, &fsUserHandle, "fs:USER");
+
+    if (res != 0)
+        return (res);
+
+    res = FSUSER_Initialize(fsUserHandle);
+    if (res != 0)
+        svc_closeHandle(fsUserHandle);
+    else
+        init = 1;
+
+    return (res);
+}
+
+void strCat(u8* src, u8* str) {
+	while(*src) {
+		src ++;
+	}
+	while(*str) {
+		*src = *str;
+		str ++;
+		src ++;
+	}
+	*src = 0;
+}
+
+void ustrCat(u16* src, u16* str) {
+	while(*src) {
+		src ++;
+	}
+	while(*str) {
+		*src = *str;
+		str ++;
+		src ++;
+	}
+	*src = 0;
+}
+
+u8 archivelist[200];
+u8 archivecount = 0;
+
+u8 checkarchive(u8* path, u8 size) {
+	u8 i;
+	for (i = 0; i < archivecount; i++) {
+		if (memcmp(archivelist + (10*i), path, size))
+			return 1;
+	}
+	return 0;
+}
+
+void addarchive(u8* path) {
+	u8 len = 0;
+	while(*(path + len)) len++;
+	if (!(checkarchive(path, len)) && (archivecount < 20)) {
+		strCat(archivelist + (10*archivecount), path);
+		archivecount++;
+	}
+}
 
 u32 fsRegArchiveCallback(u8* path, u32 ptr, u32 isAddOnContent, u32 isAlias) {
 	u32 ret, ret2;
@@ -45,6 +115,7 @@ u32 fsRegArchiveCallback(u8* path, u32 ptr, u32 isAddOnContent, u32 isAlias) {
 
 	nsDbgPrint("regArchive: %s, %08x, %08x, %08x\n", path, ptr, isAddOnContent, isAlias);
 	ret = ((fsRegArchiveTypeDef)regArchiveHook.callCode)(path, ptr, isAddOnContent, isAlias);
+	addarchive(path);
 	if (isFisrt) {
 		isFisrt = 0;
 		
@@ -85,46 +156,32 @@ void convertAnsiToUnicode(u8* ansi, u16* buf) {
 	*buf = 0;
 }
 
-void ustrCat(u16* src, u16* str) {
-	while(*src) {
-		src ++;
-	}
-	while(*str) {
-		*src = *str;
-		str ++;
-		src ++;
-	}
-	*src = 0;
-}
-
 u16 testFile []= {'r','a','m',':','/','1',0,0};
 u16 ustrRom [] = {'r','o','m',':','/'};
 u16 ustrRootPath[200];
 
-int findcharacter(u16* in, u16 character) {
-	u16 i = 0;
-	while (*(in + i)) {
-		if (*(in + i) == character)
-			return i;
-		i++;
-	}
-	return 0; //error
+u8 findu8character(u8* in, char character) {
+	u8 i = 0;
+	while ((*(in + i)) && (*(in + i) != character)) i++;
+	return (*(in + i) == character) * i; //error handling
 }
 
 u32 userFsTryOpenFileCallback(u32 a1, u16 * fileName, u32 mode) {
 	u16 buf[300];
 	u32 ret;
 
-#ifdef LOG_FILES
+
 	convertUnicodeToAnsi(fileName, (u8*) buf);
+	u8 chara = findu8character((u8*) buf, '/');
+#ifdef LOG_FILES
 	nsDbgPrint("path: %s\n", buf);
 #endif
 
-//	if (memcmp(ustrRom, fileName, sizeof(ustrRom)) == 0) {
+	if ((chara) && checkarchive((u8*) buf, chara)) {
 		// accessing rom:/ file
 		buf[0] = 0;
 		ustrCat(buf, ustrRootPath);
-		ustrCat(buf, &fileName[findcharacter(fileName, (u16)'/') + 1]);
+		ustrCat(buf, &fileName[chara + 1]);
 		ret = ((userFsTryOpenFileTypeDef)userFsTryOpenFileHook.callCode)(a1, buf, 1);
 #ifdef LOG_FILES
 		nsDbgPrint("ret: %08x\n", ret);
@@ -132,7 +189,7 @@ u32 userFsTryOpenFileCallback(u32 a1, u16 * fileName, u32 mode) {
 		if (ret == 0) {
 			return ret;
 		}
-//	}
+	}
 	return ((userFsTryOpenFileTypeDef)userFsTryOpenFileHook.callCode)(a1, fileName, mode);
 }
 
@@ -201,16 +258,6 @@ int comparestring(char *str1, char *str2, int max) {
 	}
 	return 1;
 }
-void concatstring(char *str1, char *str2) {
-	int i;
-	int lastchar1 = 0;
-	int lastchar2 = 0;
-	while (str1[lastchar1] != '\0') lastchar1++;
-	while (str2[lastchar2] != '\0') lastchar2++;
-	for (i=0;i<(lastchar1+lastchar2);i++) {
-		str1[lastchar1+i] = str2[i];
-	}	
-}
 
 void cleargarbage(char *str1) {
 	int currchar = 0;
@@ -230,19 +277,58 @@ void cleargarbage(char *str1) {
 
 char currenttid[16];
 char layeredfspath[100];
+char codepath[100];
 
 void getpath() {
 	if (comparestring(custompath,defaultfolder, 5)) {
 		memset(layeredfspath, 0, 100);
-		concatstring(layeredfspath, custompath);
+		strCat(layeredfspath, custompath);
 	} else {
 		PLGLOADER_INFO  *plgloader;
 		plgloader = (PLGLOADER_INFO *)0x07000000;
 		xsprintf(currenttid, "%08X%08X/", plgloader->tid[1], plgloader->tid[0]);
 		memset(layeredfspath, 0, 100);
-		concatstring(layeredfspath, defaultfolder);
-		concatstring(layeredfspath, currenttid);
+		strCat(layeredfspath, defaultfolder);
+		strCat(layeredfspath, currenttid);
 	}
+}
+u32 errorbuf[2];
+
+void loadcode() {
+	Handle fileout = 0;
+	u64 filesize;
+	
+	initSrv();
+	int ret = InitFS();
+	exitSrv();
+	if (ret < 0) {
+		return;
+	}
+	FSUSER_OpenArchive(fsUserHandle, &sdmcArchive);
+	memset(codepath, 0, 100);
+	strCat(codepath, &layeredfspath[findu8character(layeredfspath, '/')]);
+	strCat(codepath, "code.bin"); // This translates into /OnionFS/code.bin
+	FS_path myPath = FS_makePath(PATH_CHAR, codepath);
+	ret = FSUSER_OpenFileDirectly(fsUserHandle, &fileout, sdmcArchive, myPath, FS_OPEN_READ, FS_ATTRIBUTE_NONE);
+	if (ret < 0) {
+		FSUSER_CloseArchive(fsUserHandle, &sdmcArchive);
+		svc_closeHandle(fsUserHandle);
+		return;
+	}
+	svc_sleepThread(5000000000);
+	FSFILE_GetSize(fileout, &filesize);
+	ret = rtCheckRemoteMemoryRegionSafeForWrite(getCurrentProcessHandle(), 0x100000, (u32)filesize);
+	if (ret != 0) {
+		FSFILE_Close(fileout);
+		FSUSER_CloseArchive(fsUserHandle, &sdmcArchive);
+		svc_closeHandle(fsUserHandle);
+		return;
+	}
+	FSFILE_Read(fileout, NULL, 0, (u32*)0x100000, (u32)filesize);
+	FSFILE_Close(fileout);
+	FSUSER_CloseArchive(fsUserHandle, &sdmcArchive);
+	svc_invalidateProcessDataCache(getCurrentProcessHandle(), 0x100000, (u32)filesize);
+	return;
 }
 
 #ifdef ENABLE_LANGEMU
@@ -326,13 +412,16 @@ void findCfgReadBlock() {
 int main() {
 	u32 retv;
 	initSharedFunc();
+	memset(archivelist, 0, sizeof(archivelist));
 	getpath();
+	loadcode();
 	getvalues();
 	cleargarbage(layeredfspath);
 	if (((fsMountArchive == 0x0) && (fsRegArchive == 0x0)) && (userFsTryOpenFile == 0x0)) {
 		return 0;
 	}
 #ifdef ENABLE_LAYEREDFS
+	strCat(layeredfspath, "romfs/");
 	convertAnsiToUnicode((layeredfspath), ustrRootPath);
 	rtInitHook(&regArchiveHook, (u32) fsRegArchive, (u32) fsRegArchiveCallback);
 	rtEnableHook(&regArchiveHook);
