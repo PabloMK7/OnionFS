@@ -6,7 +6,7 @@ The plugin will redirect the game romfs to **"SD:/OnionFS/\<titleID\>/romfs"** a
 To change the redirection path, use the included python script:
 
 ```
-OnionFS_pathchange.py \<plg file path\> \<redirection path\>
+OnionFS_pathchange.py <plg file path> <redirection path>
 ```
 For example: SD:/folder/subfolder/
 ```
