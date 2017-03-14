@@ -12,7 +12,7 @@ For example: SD:/folder/subfolder/
 ```
 OnionFS_pathchange.py OnionFS.plg folder/subfolder
 ```
-(In the avobe example, romfs folder will be SD:/folder/subfolder/romfs and code file will be SD:/folder/subfolder/code.bin)
+(In the above example, romfs folder will be SD:/folder/subfolder/romfs and code file will be SD:/folder/subfolder/code.bin)
 
 ## Credits
 cell9: Cretor of layeredfs and NTRCFW.
