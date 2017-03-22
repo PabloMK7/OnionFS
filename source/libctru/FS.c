@@ -134,7 +134,7 @@ Result FSFILE_Close(Handle handle)
 	return cmdbuf[1];
 }
 
-Result FSFILE_Read(Handle handle, u32 *bytesRead, u64 offset, u32 *buffer, u32 size)
+Result FSFILE_Read(Handle handle, u32 *bytesRead, u64 offset, void *buffer, u32 size)
 {
 	u32 *cmdbuf=getThreadCommandBuffer();
  

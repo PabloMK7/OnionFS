@@ -4,7 +4,8 @@
 #include "autogen.h"
 
 /* uncomment this to log filename into debugger output */
-// #define LOG_FILES 
+// #define LOG_FILES
+// #define DEBUG_MODE
 
 #define O_RDONLY 1
 #define O_WRONLY 2
@@ -20,6 +21,8 @@
 #define WRITEU8(addr, data) *(vu8*)(addr) = data
 #define WRITEU16(addr, data) *(vu16*)(addr) = data
 #define WRITEU32(addr, data) *(vu32*)(addr) = data
+#define R_SUCCEEDED(res)   ((res)>=0)
+#define R_FAILED(res)      ((res)<0)
 #define custompath "yourpathyourpathyourpathyourpathyourpathyourpathyourpathyourpathyourpathyourpathyourpathyourpathyou"
 #define defaultfolder "ram:/OnionFS/"
 u32 fsMountArchive;
@@ -34,10 +37,16 @@ typedef u32 (*fsRegArchiveTypeDef)(u8*, u32, u32, u32) ;
 typedef u32 (*userFsTryOpenFileTypeDef)(u32, u16*, u32);
 typedef u32 (*fsMountArchiveTypeDef)(u32*, u32);
 
-
+PLGLOADER_INFO  *plgloader;
 RT_HOOK	regArchiveHook;
 RT_HOOK userFsTryOpenFileHook;
 u32     fsUserHandle = 0;
+u32 maxcodesize;
+
+#ifdef DEBUG_MODE
+char debugstring[100];
+char debugtempstring[20];
+#endif
 
 int     InitFS(void)
 {
@@ -120,11 +129,15 @@ u32 fsRegArchiveCallback(u8* path, u32 ptr, u32 isAddOnContent, u32 isAlias) {
 		isFisrt = 0;
 		
 		((fsMountArchiveTypeDef)fsMountArchive)(&sdmcArchive, 9);
+		#ifdef LOG_FILES
 		nsDbgPrint("sdmcArchive: %08x\n", sdmcArchive);
+		#endif
 		
 		if (sdmcArchive) {
 			ret2 = ((fsRegArchiveTypeDef)regArchiveHook.callCode)("ram:", sdmcArchive, 0, 0);
+			#ifdef LOG_FILES
 			nsDbgPrint("regArchive ret: %08x\n", ret2);
+			#endif
 		}
 	}
 	return ret;
@@ -207,18 +220,10 @@ void getvalues(void) {
 	fsMountArchive = 0x0;
 	fsRegArchive = 0x0;
 	userFsTryOpenFile = 0x0;
-	u32 addr = 0x00100004;
+	u32 addr = 0x00100000;
 	u32 lastPage = 0;
-	u32 currPage, ret;
-	while (1) {
-		currPage = rtGetPageOfAddress(addr);
-		if (currPage != lastPage) {
-			lastPage = currPage;
-			ret = rtCheckRemoteMemoryRegionSafeForWrite(getCurrentProcessHandle(), addr, 8);
-			if (ret != 0) {
-				return;
-			}
-		}
+	u32 ret;
+	while (addr < (maxcodesize + 0x00100000)) {
 		if (fsMountArchive == 0) {
 			if (READU32(addr) == 0xE5970010) {
 				if ((READU32(addr + 0x4) == 0xE1CD20D8) && (READU16(addr + 0x8) == 0x0000) && (READU8(addr + 0xA) == 0x8D)) {
@@ -259,10 +264,9 @@ int comparestring(char *str1, char *str2, int max) {
 	return 1;
 }
 
-void cleargarbage(char *str1) {
+void cleargarbage(char *str1, int buffsize) {
 	int currchar = 0;
 	int foundend = 0;
-	int buffsize = sizeof(str1);
 	while (currchar < buffsize) {
 		if ((foundend == 0) && (str1[currchar] == '\0')) {
 			foundend = 1;
@@ -284,8 +288,6 @@ void getpath() {
 		memset(layeredfspath, 0, 100);
 		strCat(layeredfspath, custompath);
 	} else {
-		PLGLOADER_INFO  *plgloader;
-		plgloader = (PLGLOADER_INFO *)0x07000000;
 		xsprintf(currenttid, "%08X%08X/", plgloader->tid[1], plgloader->tid[0]);
 		memset(layeredfspath, 0, 100);
 		strCat(layeredfspath, defaultfolder);
@@ -293,42 +295,145 @@ void getpath() {
 	}
 }
 u32 errorbuf[2];
+u64 currposs = 0;
 
-void loadcode() {
-	Handle fileout = 0;
+int IFile_Read(Handle *filehandle, u32* readbytes, void* outbuffer, u64 amount) {
+	int ret = FSFILE_Read(*filehandle, readbytes, (u32)currposs, outbuffer, amount);
+	currposs += amount;
+	return ret;
+}
+
+void applyCodeIpsPatch(Handle *file, u32 size)
+{
+    int ret;
+    u8 buffer[5];
+    u32 total;
+	u8* code = (u8*)0x00100000; 
+
+    if(R_FAILED(IFile_Read(file, &total, buffer, 5)) || total != 5 || memcmp(buffer, "PATCH", 5) != 0) goto exit;
+
+    while(R_SUCCEEDED(IFile_Read(file, &total, buffer, 3)) && total == 3)
+    {
+        if(memcmp(buffer, "EOF", 3) == 0) break;
+
+        u32 offset = (buffer[0] << 16) | (buffer[1] << 8) | buffer[2];
+
+        if(R_FAILED(IFile_Read(file, &total, buffer, 2)) || total != 2) break;
+
+        u32 patchSize = (buffer[0] << 8) | buffer[1];
+
+        if(!patchSize)
+        {
+            if(R_FAILED(IFile_Read(file, &total, buffer, 2)) || total != 2) break;
+
+            u32 rleSize = (buffer[0] << 8) | buffer[1];
+
+            if(offset + rleSize > size) break;
+
+            if(R_FAILED(IFile_Read(file, &total, buffer, 1)) || total != 1) break;
+
+            for(u32 i = 0; i < rleSize; i++)
+                code[offset + i] = buffer[0];
+
+            continue;
+        }
+
+        if(offset + patchSize > size) break;
+
+        if(R_FAILED(IFile_Read(file, &total, code + offset, patchSize)) || total != patchSize) break;
+    }
+
+exit:
+	#ifdef DEBUG_MODE
+		xsprintf(debugtempstring, "0x%08X", currposs);
+		strCat(debugstring, debugtempstring);
+	#endif
+	currposs = 0;
+    return;
+}
+
+void loadcode(u8 mode) {
+	Handle fileout;
 	u64 filesize;
-	
+	Handle currprocess = getCurrentProcessHandle();
 	initSrv();
 	int ret = InitFS();
 	exitSrv();
-	if (ret < 0) {
+	if (ret != 0) {
 		return;
 	}
 	FSUSER_OpenArchive(fsUserHandle, &sdmcArchive);
-	memset(codepath, 0, 100);
-	strCat(codepath, &layeredfspath[findu8character(layeredfspath, '/')]);
-	strCat(codepath, "code.bin"); // This translates into /OnionFS/code.bin
-	FS_path myPath = FS_makePath(PATH_CHAR, codepath);
-	ret = FSUSER_OpenFileDirectly(fsUserHandle, &fileout, sdmcArchive, myPath, FS_OPEN_READ, FS_ATTRIBUTE_NONE);
-	if (ret < 0) {
-		FSUSER_CloseArchive(fsUserHandle, &sdmcArchive);
-		svc_closeHandle(fsUserHandle);
-		return;
-	}
-	svc_sleepThread(5000000000);
-	FSFILE_GetSize(fileout, &filesize);
-	ret = rtCheckRemoteMemoryRegionSafeForWrite(getCurrentProcessHandle(), 0x100000, (u32)filesize);
-	if (ret != 0) {
+	if (!mode) {
+		memset(codepath, 0, 100);
+		strCat(codepath, &layeredfspath[findu8character(layeredfspath, '/')]);
+		strCat(codepath, "code.ips");
+		FS_path myPath = FS_makePath(PATH_CHAR, codepath);
+		ret = FSUSER_OpenFileDirectly(fsUserHandle, &fileout, sdmcArchive, myPath, FS_OPEN_READ, FS_ATTRIBUTE_NONE);
+		if (ret != 0) {
+			FSUSER_CloseArchive(fsUserHandle, &sdmcArchive);
+			svc_closeHandle(fileout);
+			InitFS();
+			loadcode(1);
+			return;
+		}
+		ret = rtCheckRemoteMemoryRegionSafeForWrite(getCurrentProcessHandle(), 0x00100000, maxcodesize);
+		if (ret != 0) {
+			FSFILE_Close(fileout);
+			FSUSER_CloseArchive(fsUserHandle, &sdmcArchive);
+			InitFS();
+			return;
+		}
+		applyCodeIpsPatch(&fileout, maxcodesize);
+		FSFILE_Close(fileout);
 		FSFILE_Close(fileout);
 		FSUSER_CloseArchive(fsUserHandle, &sdmcArchive);
-		svc_closeHandle(fsUserHandle);
+		InitFS();
+		svc_flushProcessDataCache(currprocess, 0x00100000, maxcodesize);
+		svc_invalidateProcessDataCache(currprocess, 0x00100000, maxcodesize);
+		return;
+	} else {
+		memset(codepath, 0, 100);
+		strCat(codepath, &layeredfspath[findu8character(layeredfspath, '/')]);
+		strCat(codepath, "code.bin");
+		FS_path myPath = FS_makePath(PATH_CHAR, codepath);
+		ret = FSUSER_OpenFileDirectly(fsUserHandle, &fileout, sdmcArchive, myPath, FS_OPEN_READ, FS_ATTRIBUTE_NONE);
+		if (ret != 0) {
+			FSUSER_CloseArchive(fsUserHandle, &sdmcArchive);
+			svc_closeHandle(fileout);
+			InitFS();
+			return;
+		}
+		FSFILE_GetSize(fileout, &filesize);
+		ret = rtCheckRemoteMemoryRegionSafeForWrite(getCurrentProcessHandle(), 0x00100000, (u32)filesize);
+		if (ret != 0) {
+			FSFILE_Close(fileout);
+			FSUSER_CloseArchive(fsUserHandle, &sdmcArchive);
+			InitFS();
+			return;
+		}
+		FSFILE_Read(fileout, NULL, 0, (u32*)0x00100000, (u32)filesize);
+		FSFILE_Close(fileout);
+		FSUSER_CloseArchive(fsUserHandle, &sdmcArchive);
+		InitFS();
+		svc_flushProcessDataCache(currprocess, 0x00100000, (u32)filesize);
+		svc_invalidateProcessDataCache(currprocess, 0x00100000, (u32)filesize);
 		return;
 	}
-	FSFILE_Read(fileout, NULL, 0, (u32*)0x100000, (u32)filesize);
-	FSFILE_Close(fileout);
-	FSUSER_CloseArchive(fsUserHandle, &sdmcArchive);
-	svc_invalidateProcessDataCache(getCurrentProcessHandle(), 0x100000, (u32)filesize);
-	return;
+}
+u32 getcodesize() { //May not be 100% accurate, but it's something...
+	u32 ret, currPage, lastPage = 0;
+	u32 addr = 0x00100000;
+	while (1) {
+		currPage = rtGetPageOfAddress(addr);
+		if (currPage != lastPage) {
+			lastPage = currPage;
+			ret = rtCheckRemoteMemoryRegionSafeForWrite(getCurrentProcessHandle(), addr, 8);
+			if (ret != 0) {
+				return addr - 0x00100000;
+			}
+		}
+		addr += 0x4;
+	}
 }
 
 #ifdef ENABLE_LANGEMU
@@ -412,11 +517,20 @@ void findCfgReadBlock() {
 int main() {
 	u32 retv;
 	initSharedFunc();
-	memset(archivelist, 0, sizeof(archivelist));
+	plgloader = (PLGLOADER_INFO *)0x07000000;
+	maxcodesize = getcodesize();
+	#ifdef DEBUG_MODE
+	memset(debugstring, 0, 100);
+	strCat(debugstring, "OnionFS_debug");
+	xsprintf(debugtempstring, " code: 0x%08X, 0x%08X", 0x100000, maxcodesize);
+	strCat(debugstring, debugtempstring);
+	#endif
+	memset(archivelist, 0, 200);
+	strCat(archivelist, "rom:"); // Since "rom:" is the default, I'll just add it here.
 	getpath();
-	loadcode();
+	loadcode(0);
 	getvalues();
-	cleargarbage(layeredfspath);
+	cleargarbage(layeredfspath, 100);
 	if (((fsMountArchive == 0x0) && (fsRegArchive == 0x0)) && (userFsTryOpenFile == 0x0)) {
 		return 0;
 	}
