@@ -97,7 +97,7 @@ void ustrCat(u16* src, u16* str) {
 }
 
 u8 archivelist[200];
-u8 archivecount = 0;
+u8 archivecount = 1;
 
 u8 checkarchive(u8* path, u8 size) {
 	u8 i;
