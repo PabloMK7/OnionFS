@@ -14,6 +14,17 @@ typedef enum{
 	MEMOP_LINEAR = 0x1000,
 }MEMORY_OPERATION;
 
+typedef struct {
+u32 flags; ///< Page flags.
+} PageInfo;
+
+typedef struct {
+u32 base_addr; ///< Base address.
+u32 size; ///< Size.
+u32 perm; ///< Memory permissions. See @ref MemPerm
+u32 state; ///< Memory state. See @ref MemState
+} MemInfo;
+
 	u32* getThreadCommandBuffer(void);
 	
 	Result svc_getDmaState(u32* state, Handle dma);
@@ -31,6 +42,7 @@ typedef enum{
 	Result svc_flushProcessDataCache(Handle handle, u32 addr, u32 size);
 	Result svc_invalidateProcessDataCache(Handle handle, u32 addr, u32 size);
 	Result svc_controlMemory(u32* outaddr, u32 addr0, u32 addr1, u32 size, u32 operation, u32 permissions); //(outaddr is usually the same as the input addr0)
+	Result svc_queryMemory(MemInfo *info, PageInfo *out, u32 addr);
 	void svc_exitProcess(void);
 	Result svc_createThread(Handle* thread, ThreadFunc entrypoint, u32 arg, u32* stacktop, s32 threadpriority, s32 processorid);
 	void svc_exitThread();
