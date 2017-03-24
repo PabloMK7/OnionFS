@@ -41,8 +41,8 @@ PLGLOADER_INFO  *plgloader;
 RT_HOOK	regArchiveHook;
 RT_HOOK userFsTryOpenFileHook;
 u32     fsUserHandle = 0;
-u32 maxcodesize;
-u32 maxtextcodesize;
+u32 maxcodesize = 0;
+u32 maxtextcodesize = 0;
 
 #ifdef DEBUG_MODE
 char debugstring[100];
@@ -352,6 +352,34 @@ exit:
     return;
 }
 
+Result getcodesize(u32* tsize, u32* csize) {
+	MemInfo minfo;
+	PageInfo pinfo;
+	u32 currPage, lastPage = 0;
+	int ret;
+	if (tsize) {
+		ret = svc_queryMemory(&minfo, &pinfo, 0x00100001);
+		if (ret != 0) return ret;
+		if (minfo.size <= 0x1000) {
+			ret = svc_queryMemory(&minfo, &pinfo, 0x00101001);
+			if (ret != 0) return ret;
+			*tsize = minfo.size + 0x1000;
+		} else *tsize = minfo.size;
+	}
+	if (csize) {
+		u32 addr = rtGetPageOfAddress(0x00100000 + *tsize);
+		while (1) {
+			ret = rtCheckRemoteMemoryRegionSafeForWrite(getCurrentProcessHandle(), addr, 0x1000);
+			if (ret != 0) {
+				*csize = addr - 0x00100000;
+				break;
+			}
+			addr += 0x1000;
+		}
+	}
+	return 0;
+}
+
 void loadcode(u8 mode) {
 	Handle fileout;
 	u64 filesize;
@@ -374,6 +402,7 @@ void loadcode(u8 mode) {
 			loadcode(1);
 			return;
 		}
+		ret = getcodesize(NULL, &maxcodesize);
 		ret = rtCheckRemoteMemoryRegionSafeForWrite(getCurrentProcessHandle(), 0x00100000, maxcodesize);
 		if (ret != 0) {
 			FSFILE_Close(fileout);
@@ -406,6 +435,7 @@ void loadcode(u8 mode) {
 			#endif
 			return;
 		}
+		ret = getcodesize(NULL, &maxcodesize);
 		FSFILE_GetSize(fileout, &filesize);
 		if ((u32)filesize > maxcodesize) {
 			FSFILE_Close(fileout);
@@ -433,33 +463,6 @@ void loadcode(u8 mode) {
 		svc_invalidateProcessDataCache(currprocess, 0x00100000, (u32)filesize);
 		return;
 	}
-}
-
-Result getcodesize(u32* tsize, u32* csize) {
-	MemInfo minfo;
-	PageInfo pinfo;
-	u32 currPage, lastPage = 0;
-	int ret = svc_queryMemory(&minfo, &pinfo, 0x00100001);
-	if (ret != 0) return ret;
-	if (minfo.size <= 0x1000) {
-		ret = svc_queryMemory(&minfo, &pinfo, 0x00101001);
-		if (ret != 0) return ret;
-		*tsize = minfo.size + 0x1000;
-	} else *tsize = minfo.size;
-	u32 addr = 0x00100000 + *tsize;
-	while (1) {
-		currPage = rtGetPageOfAddress(addr);
-		if (currPage != lastPage) {
-			lastPage = currPage;
-			ret = rtCheckRemoteMemoryRegionSafeForWrite(getCurrentProcessHandle(), addr, 8);
-			if (ret != 0) {
-				*csize = addr - 0x00100000;
-				break;
-			}
-		}
-		addr += 0x4;
-	}
-	return 0;
 }
 
 #ifdef ENABLE_LANGEMU
@@ -543,12 +546,10 @@ void findCfgReadBlock() {
 int main() {
 	u32 retv;
 	initSharedFunc();
-	int ret = getcodesize(&maxtextcodesize, &maxcodesize);
+	int ret = getcodesize(&maxtextcodesize, NULL);
 	#ifdef DEBUG_MODE
 	memset(debugstring, 0, 100);
 	strCat(debugstring, "OnionFS_debug");
-	xsprintf(debugtempstring, " text: 0x%08X / 0x%08X ", maxtextcodesize, maxcodesize);
-	strCat(debugstring, debugtempstring);
 	#endif
 	plgloader = (PLGLOADER_INFO *)0x07000000;
 	if (ret != 0) {
@@ -568,6 +569,10 @@ int main() {
 		loadcode(0);
 		InitFS();
 	}
+	#ifdef DEBUG_MODE
+		xsprintf(debugtempstring, " text: 0x%08X / 0x%08X ", maxtextcodesize, maxcodesize);
+		strCat(debugstring, debugtempstring);
+	#endif
 	getvalues();
 	cleargarbage(layeredfspath, 100);
 	if (((fsMountArchive == 0x0) && (fsRegArchive == 0x0)) && (userFsTryOpenFile == 0x0)) {
