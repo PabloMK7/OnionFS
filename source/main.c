@@ -355,7 +355,7 @@ exit:
 Result getcodesize(u32* tsize, u32* csize) {
 	MemInfo minfo;
 	PageInfo pinfo;
-	u32 currPage, lastPage = 0;
+	u32 addr, currPage, lastPage = 0;
 	int ret;
 	if (tsize) {
 		ret = svc_queryMemory(&minfo, &pinfo, 0x00100001);
@@ -367,7 +367,7 @@ Result getcodesize(u32* tsize, u32* csize) {
 		} else *tsize = minfo.size;
 	}
 	if (csize) {
-		u32 addr = rtGetPageOfAddress(0x00100000 + *tsize);
+		addr = rtGetPageOfAddress(0x00100000 + maxtextcodesize);
 		while (1) {
 			ret = rtCheckRemoteMemoryRegionSafeForWrite(getCurrentProcessHandle(), addr, 0x1000);
 			if (ret != 0) {

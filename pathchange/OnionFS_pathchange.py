@@ -1,6 +1,6 @@
 import sys;
 
-patchaddr = 15640;
+patchaddr = 15664;
 
 print("");
 try:
