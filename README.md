@@ -16,7 +16,10 @@ For example: SD:/folder/subfolder/
 ```
 OnionFS_pathchange.py OnionFS.plg folder/subfolder
 ```
-(In the above example, romfs folder will be SD:/folder/subfolder/romfs and code file will be SD:/folder/subfolder/code.(bin/ips))
+(In the above example, romfs folder will be **SD:/folder/subfolder/romfs** and code file will be **SD:/folder/subfolder/code.(bin/ips)**)
+
+## Debug mode
+If you are having problems, you can use OnionFS_debug.plg to output the plugin log to a file: **SD:/OnionFS.log**. The information given by the plugin may help you fixing what's wrong. It's not recommended to use the debug plugin for normal use as it may be slower.
 
 ## Credits
 - cell9: Developer of layeredfs and NTRCFW.
