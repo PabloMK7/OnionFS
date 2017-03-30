@@ -1,6 +1,11 @@
 import sys;
 
-patchaddr = 15664;
+
+def findaddr(data):
+	global patchaddr;
+	patchaddr = data.find('\x79\x6F\x75\x72\x70\x61\x74\x68'); #yourpath
+	print("Found path at 0x%08x" % patchaddr);
+	return;
 
 print("");
 try:
@@ -25,6 +30,7 @@ if (len(newpath) <= 100):
 	print("Setting new path to: %s" % displaypath)
 	with open(sys.argv[1], 'r+b') as f:
 		code = f.read();
+		findaddr(code);
 		f.seek(patchaddr)
 		for i in range(101):
 			f.write("\x00");
