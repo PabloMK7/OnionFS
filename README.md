@@ -19,6 +19,6 @@ OnionFS_pathchange.py OnionFS.plg folder/subfolder
 (In the above example, romfs folder will be SD:/folder/subfolder/romfs and code file will be SD:/folder/subfolder/code.(bin/ips))
 
 ## Credits
-- cell9: Developer of layeredfs and NTRCFW.
+- cell9: Cretor of layeredfs and NTRCFW.
 - Nanquitas: Helping me A LOT. xP
 - AuroraWright: ips patching code. 
