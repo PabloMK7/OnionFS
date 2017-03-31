@@ -48,6 +48,7 @@ Result FSFILE_Read(Handle handle, u32 *bytesRead, u64 offset, void *buffer, u32 
 Result FSFILE_Write(Handle handle, u32 *bytesWritten, u64 offset, u32 *buffer, u32 size, u32 flushFlags);
 Result FSFILE_GetSize(Handle handle, u64 *size);
 Result FSFILE_SetSize(Handle handle, u64 size);
+Result FSFILE_Flush(Handle handle);
 
 Result FSDIR_Read(Handle handle, u32 *entriesRead, u32 entrycount, u16 *buffer);
 Result FSDIR_Close(Handle handle);

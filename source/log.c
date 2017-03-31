@@ -50,7 +50,9 @@ void    WriteLog(const char *log)
     u32     size = (u32)strnlen(log, 0x100);
     u32     bytes;
 
-    if (!FSFILE_Write(g_logFile, &bytes, g_offset, (u32 *)log, size, 0x0))
-        g_offset += bytes;
+	if (!FSFILE_Flush(g_logFile)) {
+		if (!FSFILE_Write(g_logFile, &bytes, g_offset, (u32 *)log, size, 0x0))
+			g_offset += bytes;
+	}
 }
 #endif

@@ -48,6 +48,7 @@ u64 currposs = 0;
 FS_archive debugsdmcArchive = {0x9, (FS_path){PATH_EMPTY, 1, (u8*)""}};
 Handle debugfileout;
 u64 lastcurrposs = 0;
+u8 safewritedebug = 1;
 #endif
 
 int     InitFS(void)
@@ -110,36 +111,57 @@ u8 checkarchive(u8* path, u8 size) {
 
 void addarchive(u8* path) {
 	u8 len = 0;
+	#ifdef DEBUG_MODE
+		LOG("Registering new archive: %s... ", path);
+	#endif
 	while(*(path + len)) len++;
 	if (!(checkarchive(path, len)) && (archivecount < 20)) {
 		strCat(archivelist + (10*archivecount), path);
 		archivecount++;
+		#ifdef DEBUG_MODE
+			LOG("success\r\n");
+		#endif
 	}
+	#ifdef DEBUG_MODE
+	else {
+		LOG("skipped, already registered\r\n");
+	}
+	#endif
 }
 
 u32 fsRegArchiveCallback(u8* path, u32 ptr, u32 isAddOnContent, u32 isAlias) {
+	#ifdef DEBUG_MODE
+		while (!safewritedebug){
+			svc_sleepThread(1000000);
+		}
+		safewritedebug = 0;
+	#endif
 	u32 ret, ret2;
 	static u32 isFisrt = 1;
 	u32 sdmcArchive = 0;
-
-	nsDbgPrint("regArchive: %s, %08x, %08x, %08x\n", path, ptr, isAddOnContent, isAlias);
 	ret = ((fsRegArchiveTypeDef)regArchiveHook.callCode)(path, ptr, isAddOnContent, isAlias);
 	addarchive(path);
 	if (isFisrt) {
 		isFisrt = 0;
-		
-		((fsMountArchiveTypeDef)fsMountArchive)(&sdmcArchive, 9);
-		#ifdef LOG_FILES
-		nsDbgPrint("sdmcArchive: %08x\n", sdmcArchive);
+		#ifdef DEBUG_MODE
+			LOG("Trying to open SD archive... ");
 		#endif
+		((fsMountArchiveTypeDef)fsMountArchive)(&sdmcArchive, 9);
 		
 		if (sdmcArchive) {
 			ret2 = ((fsRegArchiveTypeDef)regArchiveHook.callCode)("ram:", sdmcArchive, 0, 0);
-			#ifdef LOG_FILES
-			nsDbgPrint("regArchive ret: %08x\n", ret2);
+			#ifdef DEBUG_MODE
+				if (ret2 != 0) {
+					LOG("failed: 0x%08X\r\n", ret2);
+				} else {
+					LOG("success.\r\n");
+				}
 			#endif
 		}
 	}
+	#ifdef DEBUG_MODE
+		safewritedebug = 1;
+	#endif
 	return ret;
 }
 
@@ -180,29 +202,41 @@ u8 findu8character(u8* in, char character) {
 }
 
 u32 userFsTryOpenFileCallback(u32 a1, u16 * fileName, u32 mode) {
+	#ifdef DEBUG_MODE
+		while (!safewritedebug){
+			svc_sleepThread(1000000);
+		}
+		safewritedebug = 0;
+	#endif
 	u16 buf[300];
 	u32 ret;
 
 
 	convertUnicodeToAnsi(fileName, (u8*) buf);
 	u8 chara = findu8character((u8*) buf, '/');
-#ifdef LOG_FILES
-	nsDbgPrint("path: %s\n", buf);
-#endif
-
 	if ((chara) && checkarchive((u8*) buf, chara)) {
-		// accessing rom:/ file
+		#ifdef DEBUG_MODE
+			LOG("File %s ", (u8*)buf);
+		#endif
 		buf[0] = 0;
 		ustrCat(buf, ustrRootPath);
 		ustrCat(buf, &fileName[chara + 1]);
 		ret = ((userFsTryOpenFileTypeDef)userFsTryOpenFileHook.callCode)(a1, buf, 1);
-#ifdef LOG_FILES
-		nsDbgPrint("ret: %08x\n", ret);
-#endif
 		if (ret == 0) {
+			#ifdef DEBUG_MODE
+				LOG("found in SD, redirected.\r\n");
+				safewritedebug = 1;
+			#endif
 			return ret;
 		}
+		#ifdef DEBUG_MODE
+		else if (ret == 0xC8804478) {LOG("not found in SD, skipping.\r\n");}
+		else {LOG("returned unknown result: 0x%08X.\r\n", ret);}
+		#endif
 	}
+	#ifdef DEBUG_MODE
+		safewritedebug = 1;
+	#endif
 	return ((userFsTryOpenFileTypeDef)userFsTryOpenFileHook.callCode)(a1, fileName, mode);
 }
 
@@ -651,10 +685,8 @@ int main() {
 	rtEnableHook(&cfgGetRegionHook);
 #endif
 #ifdef DEBUG_MODE
-	LOG("\r\nFinished patching, launching game... Bye!");
-	ExitLog();
+	LOG("\r\nFinished patching, launching game...\r\n\r\n");
 #endif
-	InitFS();
 	return 0;
 }
 
