@@ -1,0 +1,4 @@
+
+namespace CTRPluginFramework {
+	void welcomefunc();
+}
