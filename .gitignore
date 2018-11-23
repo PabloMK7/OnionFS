@@ -1,0 +1,6 @@
+Build/
+Gitlab/
+[Dd]ebug/
+.vs
+*.3gx
+*.user

@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{5DF9CE17-A431-445B-AF47-B09CF964BA9D}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <NMakeBuildCommandLine>make</NMakeBuildCommandLine>
+    <NMakeCleanCommandLine>make clean</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>make re</NMakeReBuildCommandLine>
+    <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <NMakeIncludeSearchPath>D:\Documentos\3dshack\OnionFS\Includes;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <NMakeBuildCommandLine>make</NMakeBuildCommandLine>
+    <NMakeCleanCommandLine>make clean</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>make re</NMakeReBuildCommandLine>
+    <NMakePreprocessorDefinitions>_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeForcedIncludes>D:\Documentos\3dshack\OnionFS\v2\Includes;$(NMakeForcedIncludes)</NMakeForcedIncludes>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <NMakeBuildCommandLine>make</NMakeBuildCommandLine>
+    <NMakeCleanCommandLine>make clean</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>make re</NMakeReBuildCommandLine>
+    <NMakePreprocessorDefinitions>WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeForcedIncludes>D:\Documentos\3dshack\OnionFS\v2\Includes;$(NMakeForcedIncludes)</NMakeForcedIncludes>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <NMakeBuildCommandLine>make</NMakeBuildCommandLine>
+    <NMakeCleanCommandLine>make clean</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>make re</NMakeReBuildCommandLine>
+    <NMakePreprocessorDefinitions>NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeForcedIncludes>D:\Documentos\3dshack\OnionFS\v2\Includes;$(NMakeForcedIncludes)</NMakeForcedIncludes>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Sources\Helpers\KeySequence.cpp" />
+    <ClCompile Include="Sources\main.cpp" />
+    <ClCompile Include="Sources\ptm.c" />
+    <ClCompile Include="Sources\rt.c" />
+    <ClCompile Include="Sources\save.cpp" />
+    <ClCompile Include="Sources\hooked_func.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Includes\3ds.h" />
+    <ClInclude Include="Includes\AntiPlg.hpp" />
+    <ClInclude Include="Includes\char16.h" />
+    <ClInclude Include="Includes\cheats.hpp" />
+    <ClInclude Include="Includes\csvc.h" />
+    <ClInclude Include="Includes\CTRPluginFramework.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\Graphics.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\Graphics\Color.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\Graphics\OSD.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\Menu.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\Menu\Keyboard.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\Menu\MenuEntry.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\Menu\MenuEntryHotkeys.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\Menu\MenuFolder.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\Menu\MessageBox.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\Menu\PluginMenu.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\System.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\System\Clock.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\System\Controller.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\System\Directory.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\System\File.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\System\FwkSettings.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\System\Hook.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\System\Lock.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\System\Mutex.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\System\Process.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\System\Rect.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\System\Sleep.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\System\System.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\System\Task.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\System\Time.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\System\Touch.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\System\Vector.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\Utils.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\Utils\LineReader.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\Utils\LineWriter.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\Utils\StringExtensions.hpp" />
+    <ClInclude Include="Includes\CTRPluginFramework\Utils\Utils.hpp" />
+    <ClInclude Include="Includes\ctrulib\allocator\linear.h" />
+    <ClInclude Include="Includes\ctrulib\allocator\mappable.h" />
+    <ClInclude Include="Includes\ctrulib\allocator\newlibHeap.h" />
+    <ClInclude Include="Includes\ctrulib\allocator\vram.h" />
+    <ClInclude Include="Includes\ctrulib\arpa\inet.h" />
+    <ClInclude Include="Includes\ctrulib\env.h" />
+    <ClInclude Include="Includes\ctrulib\errf.h" />
+    <ClInclude Include="Includes\ctrulib\font.h" />
+    <ClInclude Include="Includes\ctrulib\gfx.h" />
+    <ClInclude Include="Includes\ctrulib\gpu\enums.h" />
+    <ClInclude Include="Includes\ctrulib\gpu\gpu-old.h" />
+    <ClInclude Include="Includes\ctrulib\gpu\gpu.h" />
+    <ClInclude Include="Includes\ctrulib\gpu\gx.h" />
+    <ClInclude Include="Includes\ctrulib\gpu\registers.h" />
+    <ClInclude Include="Includes\ctrulib\gpu\shaderProgram.h" />
+    <ClInclude Include="Includes\ctrulib\gpu\shbin.h" />
+    <ClInclude Include="Includes\ctrulib\ipc.h" />
+    <ClInclude Include="Includes\ctrulib\netinet\in.h" />
+    <ClInclude Include="Includes\ctrulib\netinet\tcp.h" />
+    <ClInclude Include="Includes\ctrulib\os.h" />
+    <ClInclude Include="Includes\ctrulib\poll.h" />
+    <ClInclude Include="Includes\ctrulib\result.h" />
+    <ClInclude Include="Includes\ctrulib\sdmc.h" />
+    <ClInclude Include="Includes\ctrulib\services\ac.h" />
+    <ClInclude Include="Includes\ctrulib\services\am.h" />
+    <ClInclude Include="Includes\ctrulib\services\apt.h" />
+    <ClInclude Include="Includes\ctrulib\services\cfgu.h" />
+    <ClInclude Include="Includes\ctrulib\services\csnd.h" />
+    <ClInclude Include="Includes\ctrulib\services\fs.h" />
+    <ClInclude Include="Includes\ctrulib\services\gspgpu.h" />
+    <ClInclude Include="Includes\ctrulib\services\hid.h" />
+    <ClInclude Include="Includes\ctrulib\services\irrst.h" />
+    <ClInclude Include="Includes\ctrulib\services\soc.h" />
+    <ClInclude Include="Includes\ctrulib\services\sslc.h" />
+    <ClInclude Include="Includes\ctrulib\srv.h" />
+    <ClInclude Include="Includes\ctrulib\svc.h" />
+    <ClInclude Include="Includes\ctrulib\synchronization.h" />
+    <ClInclude Include="Includes\ctrulib\sys\ioctl.h" />
+    <ClInclude Include="Includes\ctrulib\sys\select.h" />
+    <ClInclude Include="Includes\ctrulib\sys\socket.h" />
+    <ClInclude Include="Includes\ctrulib\thread.h" />
+    <ClInclude Include="Includes\ctrulib\util\rbtree.h" />
+    <ClInclude Include="Includes\ctrulib\util\utf.h" />
+    <ClInclude Include="Includes\CT_Manager.hpp" />
+    <ClInclude Include="Includes\decryptor.h" />
+    <ClInclude Include="Includes\entrystructs.hpp" />
+    <ClInclude Include="Includes\foolsday.hpp" />
+    <ClInclude Include="Includes\Helpers\AutoRegion.hpp" />
+    <ClInclude Include="Includes\Helpers\HoldKey.hpp" />
+    <ClInclude Include="Includes\Helpers\MenuEntryHelpers.hpp" />
+    <ClInclude Include="Includes\Helpers\OSDManager.hpp" />
+    <ClInclude Include="Includes\Helpers\QuickMenu.hpp" />
+    <ClInclude Include="Includes\Helpers\Strings.hpp" />
+    <ClInclude Include="Includes\Helpers\Wrappers.hpp" />
+    <ClInclude Include="Includes\hooked_func.hpp" />
+    <ClInclude Include="Includes\HookInit.hpp" />
+    <ClInclude Include="Includes\ingame_sfx.h" />
+    <ClInclude Include="Includes\Lang.hpp" />
+    <ClInclude Include="Includes\LED_Control.hpp" />
+    <ClInclude Include="Includes\main.hpp" />
+    <ClInclude Include="Includes\MK_Settings.hpp" />
+    <ClInclude Include="Includes\netdb.h" />
+    <ClInclude Include="Includes\NTR_funcs.hpp" />
+    <ClInclude Include="Includes\OnionFS.hpp" />
+    <ClInclude Include="Includes\osC.hpp" />
+    <ClInclude Include="Includes\OSDManager.hpp" />
+    <ClInclude Include="Includes\PatternManager.hpp" />
+    <ClInclude Include="Includes\ptm.h" />
+    <ClInclude Include="Includes\rt.h" />
+    <ClInclude Include="Includes\save.hpp" />
+    <ClInclude Include="Includes\Helpers.hpp" />
+    <ClInclude Include="Includes\Helpers\KeySequence.hpp" />
+    <ClInclude Include="Includes\Hook.hpp" />
+    <ClInclude Include="Includes\savesettings.hpp" />
+    <ClInclude Include="Includes\Sound.hpp" />
+    <ClInclude Include="Includes\types.h" />
+    <ClInclude Include="Includes\Unicode.h" />
+    <ClInclude Include="Includes\welcome.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="OnionFS.plgInfo" />
+    <None Include="Sources\asm.s" />
+    <None Include="Sources\bootloader.s" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="Lib\libCTRPluginFramework.a" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,15 @@
+Archive vtable:
+offset    operation
+-------------------
+0: open file
+4: open directory
+8: delete file
+C: rename file
+10: delete directory
+14: delete directory recursive
+18: create file
+1C: Create directory
+20: Rename directory
+24: Set archive priority
+28: Get archive priority
+2C: Get Free Bytes
