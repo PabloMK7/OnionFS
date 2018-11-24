@@ -58,7 +58,7 @@ namespace CTRPluginFramework
 				DEBUG(", svcGetProcessInfo 0x10002 returned: 0x%08X, aborting.\n", res);
 				customBreak(0xAB047, 1, 0);
 			}
-			res = svcMapProcessMemoryEx(prochand, 0x08000000, (u32)addr, (u32)info);
+			res = svcMapProcessMemoryEx(CUR_PROCESS_HANDLE, 0x08000000, prochand, (u32)addr, (u32)info);
 			if (res) {
 				DEBUG(", svcMapProcessMemoryEx returned: 0x%08X, aborting.\n", res);
 				customBreak(0xAB047, 1, 0);
@@ -92,7 +92,7 @@ namespace CTRPluginFramework
 			for (u32 *addrRest : backup)
 				*addrRest = 0x121004;
 			svcInvalidateEntireInstructionCache();
-			svcUnmapProcessMemoryEx(prochand, 0x08000000, (u32)info);
+			svcUnmapProcessMemoryEx(CUR_PROCESS_HANDLE, 0x08000000, (u32)info);
 			svcCloseHandle(prochand);
 		}
 		if (out) {

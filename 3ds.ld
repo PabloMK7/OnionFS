@@ -13,7 +13,7 @@ PHDRS
 SECTIONS
 {
 	/* =========== CODE section =========== */
-	. = 0x00100000;
+	. = 0x07000100;
 	__start__ = . ;
 	.text ALIGN(0x4) :
 	{
@@ -123,16 +123,6 @@ SECTIONS
 		KEEP (*(SORT(.dtors.*)))	
 		KEEP (*(.dtors))
 	} : data
-
-	.rel.plt ALIGN(4):
-	{
-		*(.__rel_dyn_start)
-		*(.rel*)
-		*(.rel.*)
-		*(.rel.dyn)
-		*(.__rel_dyn_end)
-	} : data
-
 	
 	.bss ALIGN(4):
 	{	*(.__bss_start)

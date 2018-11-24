@@ -98,10 +98,9 @@ namespace CTRPluginFramework {
 		}
 		*dst = '\0';
 	}
-
+#define PA_PTR(addr)            
 	void OnionSave::initDebug() {
-		Controller::Update();
-		if (Controller::IsKeysDown(Key::DPadUp)) {
+		if ((((*(vu32 *)((u32)(0x10146000) | 1 << 31))) ^ 0xFFF) & Key::DPadUp) {
 			ENABLE_DEBUG = true;
 		}
 		if (ENABLE_DEBUG) {
