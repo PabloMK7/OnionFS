@@ -8,7 +8,7 @@ Default redirection paths:
 **\<lowtitleID\>:** The last 8 characters of the game title ID.
 
 ## ROMFS redirection
-If ROMFS redirection is enabled, the game will first try to open romfs files from the SD card, and if they don't exist then the original ones will be used. This featiure behaves the exact same way as layeredFS
+If ROMFS redirection is enabled, the game will first try to open ROMFS files from the SD card, and if they don't exist then the original ones will be used. This feature behaves the exact same way as layeredFS
 
 ## SAVE redirection
 If SAVE redirection is enabled, all the save files will be stored directly in the SD as if they were extracted from Checkpoint or JKSV. Note that the plugin won't extract the existing save files, it will create new ones. If you want to use your existing save extract it first with Checkpoint.
@@ -38,3 +38,4 @@ To enable debug mode, hold **DPAD UP** while the game is booting.
 ## Credits
 - cell9: Developer of layeredfs and NTRCFW.
 - Nanquitas: CTRPF developer and help. (A LOT of help actually :P) 
+~~"私はlolisが好きです"~~
