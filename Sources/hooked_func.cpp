@@ -80,6 +80,7 @@ namespace CTRPluginFramework {
 
 	u32  fsOpenFileFunc(u32 a1, u16* path, u32 a2) {
 		bool reopen;
+		DEBUG("fsOpenFile: ");
 		u16* newPath = calculateNewPath(path, 0, false,  &reopen);
 		int ret = ((fsu32u16u32)fileOpHooks[OPEN_FILE_OP].callCode)(a1, newPath, a2);
 		if (newPath != path) {
@@ -105,10 +106,12 @@ namespace CTRPluginFramework {
 
 	u32  fsOpenDirectoryFunc(u32 a1, u16* path) {
 		//customBreak(0xbaca, 1, 0);
-		u16* newPath = calculateNewPath(path, 1);
+		DEBUG("fsOpenDirectory: ");
+		u16* newPath = calculateNewPath(path, 0);
 		if (newPath != path) {
 			int res = checkFileExistsWithDir(newPath);
 			if (res) return res;
+			if (OnionSave::getArchiveMode(path) == ARCH_ROMFS) newPath = path;
 		}
 		int ret = ((fsu32u16)fileOpHooks[OPEN_DIRECTORY_OP].callCode)(a1, newPath);
 		return ret;
@@ -116,6 +119,7 @@ namespace CTRPluginFramework {
 
 	u32  fsDeleteFileFunc(u16* path) {
 		//customBreak(0xbaca, 2, 0);
+		DEBUG("fsDeleteFile: ");
 		u16* newPath = calculateNewPath(path, 1);
 		int ret = ((fsu16)fileOpHooks[DELETE_FILE_OP].callCode)(newPath);
 		return ret;
@@ -123,7 +127,9 @@ namespace CTRPluginFramework {
 
 	u32  fsRenameFileFunc(u16* path1, u16* path2) {
 		//customBreak(0xbaca, 3, 0);
+		DEBUG("fsRenameFileFrom: ");
 		u16* newPath1 = calculateNewPath(path1, 1);
+		DEBUG("fsRenameFileTo: ");
 		u16* newPath2 = calculateNewPath(path2, 1, true);
 		int ret = ((fsu16u16)fileOpHooks[RENAME_FILE_OP].callCode)(newPath1, newPath2);
 		return ret;
@@ -131,18 +137,21 @@ namespace CTRPluginFramework {
 
 	u32  fsDeleteDirectoryFunc(u16* path) {
 		//customBreak(0xbaca, 4, 0);
+		DEBUG("fsDeleteDirectory: ");
 		u16* newPath = calculateNewPath(path, 1);
 		int ret = ((fsu16)fileOpHooks[DELETE_DIRECTORY_OP].callCode)(newPath);
 		return ret;
 	}
 	u32  fsDeleteDirectoryRecFunc(u16* path) {
 		//customBreak(0xbaca, 5, 0);
+		DEBUG("fsDeleteDirectoryRecursive: ");
 		u16* newPath = calculateNewPath(path, 1);
 		int ret = ((fsu16)fileOpHooks[DELETE_DIRECTORY_RECURSIVE_OP].callCode)(newPath);
 		return ret;
 	}
 	u32  fsCreateFileFunc(u16* path, u64 a2) {
 		//customBreak(0xbaca, 6, 0);
+		DEBUG("fsCreateFile: ");
 		u16* newPath = calculateNewPath(path, 1);
 		int ret = ((fsu16u64)fileOpHooks[CREATE_FILE_OP].callCode)(newPath, a2);
 		return ret;
@@ -150,6 +159,7 @@ namespace CTRPluginFramework {
 
 	u32  fsCreateDirectoryFunc(u16* path) {
 		//customBreak(0xbaca, 7, 0);
+		DEBUG("fsCreateDirectory: ");
 		u16* newPath = calculateNewPath(path, 1);
 		int ret = ((fsu16)fileOpHooks[CREATE_DIRECTORY_OP].callCode)(newPath);
 		return ret;
@@ -157,7 +167,9 @@ namespace CTRPluginFramework {
 
 	u32  fsRenameDirectoryFunc(u16* path1, u16* path2) {
 		//customBreak(0xbaca, 8, 0);
+		DEBUG("fsRenameDirectoryFrom: ");
 		u16* newPath1 = calculateNewPath(path1, 1);
+		DEBUG("fsRenameDirectoryTo: ");
 		u16* newPath2 = calculateNewPath(path2, 1, true);
 		int ret = ((fsu16u16)fileOpHooks[RENAME_DIRECTORY_OP].callCode)(newPath1, newPath2);
 		return ret;

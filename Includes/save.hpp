@@ -46,6 +46,7 @@ namespace CTRPluginFramework {
 		static Result saveSettings();
 		static void addArchive(u8* arch, u64 handle);
 		static bool getArchive(u16* arch, u8* mode, bool isReadOnly);
+		static int getArchiveMode(u16 * arch);
 		static void initDebug();
 		static void debugAppend(std::string);
 		static int existArchiveu16(u16* arch);

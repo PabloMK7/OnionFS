@@ -33,6 +33,9 @@
     <ClCompile Include="Sources\ptm.c">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\patches.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Includes\CTRPluginFramework\Graphics\Color.hpp">
@@ -381,6 +384,9 @@
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="Includes\welcome.hpp">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\patches.hpp">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>

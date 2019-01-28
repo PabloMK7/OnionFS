@@ -96,6 +96,7 @@
   <ItemGroup>
     <ClCompile Include="Sources\Helpers\KeySequence.cpp" />
     <ClCompile Include="Sources\main.cpp" />
+    <ClCompile Include="Sources\patches.cpp" />
     <ClCompile Include="Sources\ptm.c" />
     <ClCompile Include="Sources\rt.c" />
     <ClCompile Include="Sources\save.cpp" />
@@ -206,6 +207,7 @@
     <ClInclude Include="Includes\OnionFS.hpp" />
     <ClInclude Include="Includes\osC.hpp" />
     <ClInclude Include="Includes\OSDManager.hpp" />
+    <ClInclude Include="Includes\patches.hpp" />
     <ClInclude Include="Includes\PatternManager.hpp" />
     <ClInclude Include="Includes\ptm.h" />
     <ClInclude Include="Includes\rt.h" />

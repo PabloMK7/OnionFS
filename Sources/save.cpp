@@ -462,6 +462,11 @@ namespace CTRPluginFramework {
 		if (!checkFolderExists(OnionSave::dataPath + 4)) Directory::Create(TOP_DIR "/" << std::string(settings.entries[settings.header.lastLoadedPack].name) << "/save");
 	}
 	
+	int OnionSave::getArchiveMode(u16* arch) {
+		int entry = existArchiveu16(arch);
+		if (entry == -1) return -1;
+		else return save.entries[entry].type;
+	}
 	bool OnionSave::getArchive(u16 * arch, u8* mode, bool isReadOnly)
 	{
 		int entry = existArchiveu16(arch);
