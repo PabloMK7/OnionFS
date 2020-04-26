@@ -38,7 +38,7 @@ namespace CTRPluginFramework {
 			::operator delete(buff);
 			return;
 		}
-		DEBUG(" succeded.");
+		DEBUG(" succeded.\n");
 		::operator delete(buff);
 	}
 
@@ -102,4 +102,106 @@ namespace CTRPluginFramework {
 		}
 		DEBUG(" succeded.\n")
 	}
+	/*
+	#define MEMPERM_RW (MEMPERM_READ | MEMPERM_WRITE)
+	#define MEMPERM_RX (MEMPERM_READ | MEMPERM_EXECUTE)
+	#define MEMPERM_RWX (MEMPERM_READ | MEMPERM_WRITE | MEMPERM_EXECUTE)
+
+	void Patches::applySectionsPatch()
+	{
+		u32     addr = 0x00100000;
+		u32     regionSize;
+
+		// Un-map .text
+		Process::CheckRegion(addr, regionSize);
+		svcControlMemoryEx(&addr, addr, 0, regionSize, MEMOP_FREE, (MemPerm)0, true);
+
+		addr += regionSize;
+		// Un-map .rodata
+		Process::CheckRegion(addr, regionSize);
+		svcControlMemoryEx(&addr, addr, 0, regionSize, MEMOP_FREE, (MemPerm)0, true);
+
+		addr += regionSize;
+		// Un-map .data
+		Process::CheckRegion(addr, regionSize);
+		svcControlMemoryEx(&addr, addr, 0, regionSize, MEMOP_FREE, (MemPerm)0, true);
+
+		File file("/test/text.bin", File::READ);
+
+		if (!file.IsOpen())
+			svcBreak(USERBREAK_ASSERT);
+		// Map .text
+		addr = 0x00100000;
+		regionSize = file.GetSize();
+		svcControlMemoryEx(&addr, addr, (u32)nullptr, regionSize, MEMOP_ALLOC, (MemPerm)MEMPERM_RW, true);
+		file.Read((void *)addr, regionSize);
+		svcControlProcessMemory(Process::GetHandle(), addr, addr, regionSize, 6, MEMPERM_RX);
+
+		// Map .rodata
+		file.Close();
+		File::Open(file, "/test/rodata.bin", File::READ);
+		if (!file.IsOpen())
+			svcBreak(USERBREAK_ASSERT);
+
+		addr += regionSize;
+		regionSize = file.GetSize();
+		svcControlMemoryEx(&addr, addr, (u32)nullptr, regionSize, MEMOP_ALLOC, (MemPerm)MEMPERM_RW, true);
+		file.Read((void *)addr, regionSize);
+		svcControlProcessMemory(Process::GetHandle(), addr, addr, regionSize, 6, MEMPERM_READ);
+
+		// Map .data !! WARNING: ensure that the bss section is part of the data.bin !!
+		file.Close();
+		File::Open(file, "/test/data.bin", File::READ);
+		if (!file.IsOpen())
+			svcBreak(USERBREAK_ASSERT);
+
+		addr += regionSize;
+		regionSize = file.GetSize();
+		svcControlMemoryEx(&addr, addr, (u32)nullptr, regionSize, MEMOP_ALLOC, (MemPerm)MEMPERM_RW, true);
+		file.Read((void *)addr, regionSize);
+
+		svcFlushEntireDataCache();
+	}
+	void Patches::dumpSectionsPatch()
+	{
+
+		Directory::Create("/test");
+
+		u32 addr = 0x00100000;
+		u32 regionSize;
+
+		Process::CheckRegion(addr, regionSize);
+
+		File    file("/test/text.bin", File::RWC | File::TRUNCATE);
+
+		if (!file.IsOpen())
+			svcBreak(USERBREAK_ASSERT);
+
+		// Dump .text
+		file.Write((void *)addr, regionSize);
+		file.Flush();
+		file.Close();
+
+		// Dump .rodata
+		File::Open(file, "/test/rodata.bin", File::RWC | File::TRUNCATE);
+		if (!file.IsOpen())
+			svcBreak(USERBREAK_ASSERT);
+
+		addr += regionSize;
+		Process::CheckRegion(addr, regionSize);
+		file.Write((void *)addr, regionSize);
+		file.Flush();
+		file.Close();
+
+		// Dump .data + bss
+		File::Open(file, "/test/data.bin", File::RWC | File::TRUNCATE);
+		if (!file.IsOpen())
+			svcBreak(USERBREAK_ASSERT);
+
+		addr += regionSize;
+		Process::CheckRegion(addr, regionSize);
+		file.Write((void *)addr, regionSize);
+		file.Flush();
+		file.Close();
+	}*/
 }

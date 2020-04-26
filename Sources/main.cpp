@@ -10,7 +10,8 @@ u8 fsRegArchivePat[] = { 0xB4, 0x44, 0x20, 0xC8, 0x59, 0x46, 0x60, 0xD8 };
 u8 userFsTryOpenFilePat1[] = { 0x0D, 0x10, 0xA0, 0xE1, 0x00, 0xC0, 0x90, 0xE5, 0x04, 0x00, 0xA0, 0xE1, 0x3C, 0xFF, 0x2F, 0xE1 };
 u8 userFsTryOpenFilePat2[] = { 0x10, 0x10, 0x8D, 0xE2, 0x00, 0xC0, 0x90, 0xE5, 0x05, 0x00, 0xA0, 0xE1, 0x3C, 0xFF, 0x2F, 0xE1 };
 u8 openArchivePat[] = { 0xF0, 0x81, 0xBD, 0xE8, 0xC2, 0x00, 0x0C, 0x08 };
-u8 formatSavePat[] = { 0xF0, 0x9F, 0xBD, 0xE8, 0x42, 0x02, 0x4C, 0x08 };
+u8 formatSavePat1[] = { 0xF0, 0x9F, 0xBD, 0xE8, 0x42, 0x02, 0x4C, 0x08 };
+u8 formatSavePat2[] = { 0xF0, 0x87, 0xBD, 0xE8, 0x42, 0x02, 0x4C, 0x08 };
 u8 fsSetThisSecValPat[] = {0xC0, 0x00, 0x6E, 0x08};
 u8 fsObsSetThisSecValPat[] = {0x40, 0x01, 0x65, 0x08};
 u8 fsSetSecValPat[] = {0x80, 0x01, 0x75, 0x08};
@@ -226,13 +227,13 @@ namespace CTRPluginFramework
 		u32* endAddr = (u32*)(0x100000 + textSize);
 		bool contOpen = true, contMount = true, contReg = true, contArch = true, contDelete = true, contSetThis = true, contSetObs = true, contSet = true;
 		while (addr < endAddr && (contOpen || contMount || contReg || contArch || contDelete || contSetThis || contSetObs || contSet)) {
-			if (contOpen && memcmp(addr, userFsTryOpenFilePat1, sizeof(userFsTryOpenFilePat1)) == 0 || memcmp(addr, userFsTryOpenFilePat2, sizeof(userFsTryOpenFilePat2)) == 0) {
+			if (contOpen && (memcmp(addr, userFsTryOpenFilePat1, sizeof(userFsTryOpenFilePat1)) == 0 || memcmp(addr, userFsTryOpenFilePat2, sizeof(userFsTryOpenFilePat2)) == 0)) {
 				u32* fndaddr = findNearestSTMFD(addr);
 				DEBUG("tryOpenFile found at 0x%08X\n", (u32)fndaddr);
 				contOpen = false;
 				processFileSystemOperations(fndaddr, endAddr);
 			}
-			if (contMount && memcmp(addr, fsMountArchivePat1, sizeof(fsMountArchivePat1)) == 0 || memcmp(addr, fsMountArchivePat2, sizeof(fsMountArchivePat2)) == 0) {
+			if (contMount && (memcmp(addr, fsMountArchivePat1, sizeof(fsMountArchivePat1)) == 0 || memcmp(addr, fsMountArchivePat2, sizeof(fsMountArchivePat2)) == 0)) {
 				u32* fndaddr = findNearestSTMFD(addr);
 				DEBUG("mountArchive found at 0x%08X\n", (u32)fndaddr);
 				contMount = false;
@@ -252,7 +253,7 @@ namespace CTRPluginFramework
 				rtInitHook(&openArchiveHook, (u32)fndaddr, (u32)fsOpenArchiveFunc);
 				rtEnableHook(&openArchiveHook);
 			}
-			if (contDelete && memcmp(addr, formatSavePat, sizeof(formatSavePat)) == 0) {
+			if (contDelete && (memcmp(addr, formatSavePat1, sizeof(formatSavePat1)) == 0 || memcmp(addr, formatSavePat2, sizeof(formatSavePat2)) == 0)) {
 				contDelete = false;
 				u32* fndaddr = findNearestSTMFD(addr);
 				DEBUG("formatSaveData found at 0x%08X\n", (u32)fndaddr);
@@ -393,17 +394,22 @@ namespace CTRPluginFramework
 		}
 	}
 
+	static void DumpCodeSections(MenuEntry* entry) {
+		Patches::dumpSectionsPatch();
+	}
+
     static void    CreateMenu(PluginMenu &menu)
     {
 		menu.Append(new MenuEntry("OnionFS", nullptr, onionConfig, "OnionFS configuration. Use this to configure different modpacks / savepacks."));
-    }
+		//menu.Append(new MenuEntry("Dump Code Sections", nullptr, DumpCodeSections, "Use this to dump the current process code into different sections."));
+	}
 
     int    main(void)
     {
         PluginMenu      *menu = new PluginMenu("OnionFS", MAJOR_VERSION, MINOR_VERSION, REVISION_VERSION, about);
 
         menu->SynchronizeWithFrame(true);
-		menu->ShowWelcomeMessage(false);
+		menu->ShowWelcomeMessage(true);
 
         CreateMenu(*menu);
         // Launch menu and mainloop
@@ -412,4 +418,24 @@ namespace CTRPluginFramework
         // Exit plugin
         return (0);
     }
+
+	void OnExitProcess(void) {
+		return;
+		u32     addr = 0x00100000;
+		u32     regionSize;
+
+		// Un-map .text
+		Process::CheckRegion(addr, regionSize);
+		svcControlMemoryEx(&addr, addr, 0, regionSize, MEMOP_FREE, (MemPerm)0, true);
+
+		addr += regionSize;
+		// Un-map .rodata
+		Process::CheckRegion(addr, regionSize);
+		svcControlMemoryEx(&addr, addr, 0, regionSize, MEMOP_FREE, (MemPerm)0, true);
+
+		addr += regionSize;
+		// Un-map .data
+		Process::CheckRegion(addr, regionSize);
+		svcControlMemoryEx(&addr, addr, 0, regionSize, MEMOP_FREE, (MemPerm)0, true);
+	}
 }

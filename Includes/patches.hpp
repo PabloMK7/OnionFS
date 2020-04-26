@@ -7,5 +7,7 @@ namespace CTRPluginFramework {
 	public:
 		static void applyCodeBinPatch();
 		static void applyCodeIpsPatch();
+		// static void applySectionsPatch();
+		// static void dumpSectionsPatch();
 	};
 }
