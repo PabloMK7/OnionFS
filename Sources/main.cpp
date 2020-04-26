@@ -395,7 +395,7 @@ namespace CTRPluginFramework
 	}
 
 	static void DumpCodeSections(MenuEntry* entry) {
-		Patches::dumpSectionsPatch();
+		//Patches::dumpSectionsPatch();
 	}
 
     static void    CreateMenu(PluginMenu &menu)
