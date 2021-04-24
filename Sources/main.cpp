@@ -1,7 +1,6 @@
 #include "CTRPluginFramework.hpp"
 #include "main.hpp"
 #include "save.hpp"
-#include "ptm.h"
 #include "patches.hpp"
 
 u8 fsMountArchivePat1[] = { 0x10, 0x00, 0x97, 0xE5, 0xD8, 0x20, 0xCD, 0xE1, 0x00, 0x00, 0x8D };

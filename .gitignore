@@ -4,3 +4,4 @@ Gitlab/
 .vs
 *.3gx
 *.user
+.vscode/

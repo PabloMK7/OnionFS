@@ -1,6 +1,5 @@
 #include "save.hpp"
 #include "main.hpp"
-#include "ctrulib/util/utf.h"
 #include "Unicode.h"
 
 namespace CTRPluginFramework {

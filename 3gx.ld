@@ -13,12 +13,14 @@ PHDRS
 SECTIONS
 {
 	/* =========== CODE section =========== */
-	. = 0x07000100;
-	__start__ = . ;
-	.text ALIGN(0x4) :
+
+	PROVIDE(__start__ = 0x07000100);
+	. = __start__;
+
+	.text ALIGN(4) :
 	{
 		/* .init */		
-		bootloader.o (.text*)
+		KEEP( *(.crt0) )
 		KEEP( *(.init) )
 		. = ALIGN(4);
 
@@ -48,7 +50,7 @@ SECTIONS
 		*(.gnu.linkonce.r*)	
 		SORT(CONSTRUCTORS)
 		. = ALIGN(4);
-	}
+	} : rodata
 
 	.ARM.extab : { *(.ARM.extab* .gnu.linkonce.armextab.*) } : rodata
 	__exidx_start = .;
@@ -124,24 +126,26 @@ SECTIONS
 		KEEP (*(.dtors))
 	} : data
 	
-	.bss ALIGN(4):
-	{	*(.__bss_start)
+	__bss_start__ = .;
+	.bss ALIGN(4) :
+	{
 		*(.dynbss)
 		*(.bss)
 		*(.bss.*)
 		*(.gnu.linkonce.b*)
 		*(COMMON)
 		. = ALIGN(4);
-		*(.__bss_end)
+
 		/* Reserve space for the TLS segment of the main thread */
 		__tls_start = .;
 		. += + SIZEOF(.tdata) + SIZEOF(.tbss);
 		__tls_end = .;
 	} : data
-
+	__bss_end__ = .;
+	
 	__end__ = ABSOLUTE(.) ;
 
-		/* ==================
+	/* ==================
 	   ==== Metadata ====
 	   ================== */
 

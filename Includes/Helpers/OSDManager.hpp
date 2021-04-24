@@ -1,7 +1,7 @@
 #ifndef OSD_MANAGER_HPP
 #define OSD_MANAGER_HPP
 
-#include "3DS.h"
+#include <3ds.h>
 #include "CTRPluginFramework.hpp"
 
 #include <map>
